@@ -1,0 +1,36 @@
+name: Snyk Docker Image Scan
+
+on:
+  push:
+    branches:
+      - main  # Trigger the scan on every push to the main branch
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest  # Use the latest version of Ubuntu for the runner
+
+    steps:
+    # Step 1: Checkout the repository code
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Step 2: Set up Docker Buildx (for building multi-platform images)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    # Step 3: Log in to Docker Hub (using secrets for Docker Hub credentials)
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    # Step 4: Build the Docker image using the Dockerfile
+    - name: Build Docker image
+      run: docker build -t my-node-app .
+
+    # Step 5: Scan the Docker image using Snyk
+    - name: Scan Docker image with Snyk
+      uses: snyk/actions/docker@master  # Use the latest Snyk Docker action
+      with:
+        image: my-node-app  # Name of the Docker image
+        args: --file=Dockerfile  # Path to the Dockerfile
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}  # Use the Snyk API token stored in secrets
