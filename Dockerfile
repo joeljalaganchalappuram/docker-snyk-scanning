@@ -1,5 +1,5 @@
 # Use a vulnerable base image for demonstration purposes
-FROM node:12
+FROM node:23.2.0
 
 # Set the working directory
 WORKDIR /usr/src/app
